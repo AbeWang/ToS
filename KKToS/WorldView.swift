@@ -29,11 +29,12 @@ class WorldView : UIView {
                 let pathRect: CGRect = CGRectMake(gridHeight * Double(column), gridHeight * Double(row), gridHeight, gridHeight)
                 let path: UIBezierPath = UIBezierPath(rect: pathRect)
                 if (column + row) % 2 == 0 {
-                    UIColor(white: 0.4, alpha: 1.0).set()
+                    UIColor(red: 0.133, green: 0.075, blue: 0.04, alpha: 1.0).set()
                 }
                 else {
-                    UIColor(white: 0.5, alpha: 1.0).set()
+                    UIColor(red: 0.259, green: 0.153, blue: 0.082, alpha: 1.0).set()
                 }
+                path.stroke()
                 path.fill()
             }
         }

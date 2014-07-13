@@ -3,7 +3,7 @@
 //  KKToS
 //
 //  Created by Abe on 2014/7/8.
-//  Copyright (c) 2014年 Abe Wang. All rights reserved.
+//  Copyright (c) 2014 Abe Wang. All rights reserved.
 //
 
 import UIKit

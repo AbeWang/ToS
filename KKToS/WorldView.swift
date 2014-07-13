@@ -3,7 +3,7 @@
 //  KKToS
 //
 //  Created by Abe on 2014/7/8.
-//  Copyright (c) 2014年 Abe Wang. All rights reserved.
+//  Copyright (c) 2014 Abe Wang. All rights reserved.
 //
 
 import UIKit
@@ -18,15 +18,15 @@ class WorldView : UIView {
         self.backgroundColor = UIColor.clearColor()
         self.rowCount = rowCount
         self.columnCount = columnCount
-        self.gridHeight = CGRectGetWidth(frame) / Double(columnCount)
-        self.frame = CGRectMake(frame.origin.x, frame.origin.y, CGRectGetWidth(frame), gridHeight * Double(rowCount))
+        self.gridHeight = CGRectGetWidth(frame) / CGFloat(columnCount)
+        self.frame = CGRectMake(frame.origin.x, frame.origin.y, CGRectGetWidth(frame), gridHeight * CGFloat(rowCount))
     }
     
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)
         for var row = 0; row < rowCount; ++row {
             for var column = 0; column < columnCount; ++column {
-                let pathRect: CGRect = CGRectMake(gridHeight * Double(column), gridHeight * Double(row), gridHeight, gridHeight)
+                let pathRect: CGRect = CGRectMake(gridHeight * CGFloat(column), gridHeight * CGFloat(row), gridHeight, gridHeight)
                 let path: UIBezierPath = UIBezierPath(rect: pathRect)
                 if (column + row) % 2 == 0 {
                     UIColor(red: 0.133, green: 0.075, blue: 0.04, alpha: 1.0).set()

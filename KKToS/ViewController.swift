@@ -126,7 +126,7 @@ class ViewController: UIViewController {
         var touchLocation: CGPoint = touch.locationInView(worldView)
         
         if touchLocation.y < 0 {
-            touchLocation.y = 0
+            return
         }
         
         let touchPosition: NodePosition = self.touchPosition(touchLocation)
@@ -145,6 +145,10 @@ class ViewController: UIViewController {
     }
     
     override func touchesMoved(touches: NSSet!, withEvent event: UIEvent!) {
+        if tempNodeLayer.superlayer == nil {
+            return
+        }
+        
         let touch: UITouch = touches.anyObject() as UITouch
         var touchLocation: CGPoint = touch.locationInView(worldView)
         var nodeRect: CGRect = touchNodeLayer.frame
@@ -168,10 +172,11 @@ class ViewController: UIViewController {
     }
     
     override func touchesEnded(touches: NSSet!, withEvent event: UIEvent!) {
-        touchNodeLayer.frame = touchNodeRect
-        if tempNodeLayer.superlayer {
-            tempNodeLayer.removeFromSuperlayer()
+        if tempNodeLayer.superlayer == nil {
+            return
         }
+        touchNodeLayer.frame = touchNodeRect
+        tempNodeLayer.removeFromSuperlayer()
         
         // Detect Combo
     }

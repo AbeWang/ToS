@@ -117,8 +117,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
         touchNodeLayer.nodePosition = currentNodePosition
         
         // Set Node Frame
-        let currentNodeRect = node.frame
+		let currentNodeRect = node.frame
+		CATransaction.begin()
+		CATransaction.setAnimationDuration(0.1)
         node.frame = touchNodeRect
+		CATransaction.commit()
         touchNodeRect = currentNodeRect
         
         // Update Temp Node

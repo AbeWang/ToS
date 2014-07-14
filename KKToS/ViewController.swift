@@ -9,8 +9,9 @@
 import UIKit
 import QuartzCore
 
-class ViewController: UIViewController {
-    
+class ViewController: UIViewController, ProgressViewDelegate {
+
+	var progressView: ProgressView!
     var worldView: WorldView!
     var nodes: NSMutableArray!
     
@@ -20,13 +21,17 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         worldView = WorldView(frame: CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.bounds), 0.0), rowCount: 5, columnCount: 6)
         var worldRect: CGRect = worldView.frame
         worldRect.origin.y = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(worldRect)
         worldView.frame = worldRect
         self.view.addSubview(worldView)
-        
+
+		progressView = ProgressView(frame: CGRectMake(0.0, CGRectGetMinY(worldView.frame) - 20.0, CGRectGetWidth(self.view.bounds), 20.0))
+		progressView.delegate = self
+		self.view.addSubview(progressView)
+
         nodes = self.createNodes(rowCount: worldView.rowCount, columnCount: worldView.columnCount)
         self.addNodesToWorldView()
         
@@ -87,7 +92,7 @@ class ViewController: UIViewController {
         let column: Int = Int(floor(position.x / worldView.gridHeight) + 1)
         return NodePosition(row: row, column: column)
     }
-    
+
     func moveTouchNodeTo(#node: NodeLayer) {
         let touchNodePosition: NodePosition = touchNodeLayer.nodePosition
         let currentNodePosition: NodePosition = node.nodePosition
@@ -120,7 +125,18 @@ class ViewController: UIViewController {
         tempNodeLayer.frame = touchNodeRect
         tempNodeLayer.nodePosition = currentNodePosition
     }
-    
+
+	func timerTimeOutInProgressView(progressView: ProgressView!) {
+		UIApplication.sharedApplication().beginIgnoringInteractionEvents()
+		self._touchesEnded()
+
+		let delay = 1.0 * CGFloat(NSEC_PER_SEC)
+		let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+		dispatch_after(time, dispatch_get_main_queue(), {
+			UIApplication.sharedApplication().endIgnoringInteractionEvents()
+		})
+	}
+
     override func touchesBegan(touches: NSSet!, withEvent event: UIEvent!) {
         let touch: UITouch = touches.anyObject() as UITouch
         var touchLocation: CGPoint = touch.locationInView(worldView)
@@ -167,17 +183,27 @@ class ViewController: UIViewController {
         let currentNodePosition: NodePosition = self.touchPosition(touchLocation)
         if currentNodePosition.row != touchNodeLayer.nodePosition.row ||
            currentNodePosition.column != touchNodeLayer.nodePosition.column {
+
+			if !progressView.isRunning {
+				progressView.startCountingDownWithTimeInterval(6.0)
+			}
             self.moveTouchNodeTo(node: self.nodeLayer(position: currentNodePosition))
         }
     }
     
     override func touchesEnded(touches: NSSet!, withEvent event: UIEvent!) {
-        if tempNodeLayer.superlayer == nil {
-            return
-        }
-        touchNodeLayer.frame = touchNodeRect
-        tempNodeLayer.removeFromSuperlayer()
-        
-        // Detect Combo
+        self._touchesEnded()
     }
+
+	func _touchesEnded() {
+		if tempNodeLayer.superlayer == nil {
+			return
+		}
+		progressView.timerInvalidate()
+		touchNodeLayer.frame = touchNodeRect
+		tempNodeLayer.removeFromSuperlayer()
+
+		// Detect combo & Remove nodes
+		// Add new nodes
+	}
 }

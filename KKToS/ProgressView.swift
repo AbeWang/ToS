@@ -17,8 +17,8 @@ class ProgressView : UIView {
 
 	var delegate: ProgressViewDelegate!
 	var timer: NSTimer!
-	var currentTime: CGFloat = 10.0
-	var countingDownTimeInterval: CGFloat = 10.0
+	var currentTime: NSTimeInterval = 10.0
+	var countingDownTimeInterval: NSTimeInterval = 10.0
 	var isRunning: Bool = false
 
 	init(frame: CGRect) {
@@ -66,7 +66,7 @@ class ProgressView : UIView {
 		super.drawRect(rect)
 
 		UIColor.greenColor().set()
-		let valueRect: CGRect = CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds) * (currentTime / countingDownTimeInterval), CGRectGetHeight(self.bounds))
+		let valueRect: CGRect = CGRectMake(0.0, 0.0, CGRectGetWidth(self.bounds) * CGFloat(currentTime / countingDownTimeInterval), CGRectGetHeight(self.bounds))
 		var valuePath: UIBezierPath = UIBezierPath(rect: valueRect)
 		valuePath.fill()
 	}

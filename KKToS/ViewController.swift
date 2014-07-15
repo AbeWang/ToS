@@ -137,16 +137,10 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		touchNodeLayer.frame = touchNodeRect
 		tempNodeLayer.removeFromSuperlayer()
 
-		// 1. Combo Set
-		self.handleComboNodes()
-		// 2. Remove nodes
-//		self.removeNodes()
-		// 3. Add new nodes
-
-		// 4. Repeat 1~3 until no combo
+        var comboResult: Bool = self.handleComboNodes()
 	}
 
-	func handleComboNodes() {
+	func handleComboNodes() -> Bool {
 
 		var	comboNodePositions: [NodePosition] = []
 
@@ -171,6 +165,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			return count
 		}
 
+        // Check combo nodes
 		for rowIndex in 0..<nodes.count {
 			var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
 			for columnIndex in 0..<rowArray.count {
@@ -219,13 +214,17 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				}
 			}
 		}
+        
+        if comboNodePositions.count == 0 {
+            return false
+        }
 
-		// Remove Nodes
-
+		// Move node animations
 		for comboNodePosition in comboNodePositions {
+            let node: NodeLayer = self.nodeLayer(position: comboNodePosition)
 			CATransaction.begin()
 			CATransaction.setAnimationDuration(0.5)
-			let node: NodeLayer = self.nodeLayer(position: comboNodePosition)
+            CATransaction.setCompletionBlock({node.removeFromSuperlayer()})
 			node.hidden = true
 			CATransaction.commit()
 		}
@@ -236,7 +235,6 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				let node: NodeLayer! = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
 				let comboCount: Int = comboNodeCount(below: node)
 				if comboCount != 0 {
-					node.nodePosition.row += comboCount
 					let delay = 1.0 * CGFloat(NSEC_PER_SEC)
 					let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
 					dispatch_after(time, dispatch_get_main_queue(), {
@@ -251,7 +249,84 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			}
 		}
 
-		//
+		// Updates node array by column
+        for columnIndex in 0..<worldView.columnCount {
+            // Phase 1 : Compute combo nodes count
+            // Phase 2 : Remove combo nodes
+            var comboCount: Int = 0
+            for comboNodePosition in comboNodePositions {
+                if comboNodePosition.column == columnIndex + 1 {
+                    comboCount++
+                    var rowArray: NSMutableArray = nodes.objectAtIndex(comboNodePosition.row - 1) as NSMutableArray
+                    rowArray.removeObjectAtIndex(columnIndex)
+                }
+            }
+            
+            // Phase 3 : 由下往上找要掉下來的node，remove 往下 insert
+            func comboNodePositionArrayContainsPosition(position: NodePosition) -> Bool {
+                for comboNodePosition in comboNodePositions {
+                    if comboNodePosition.column == position.column && comboNodePosition.row == position.row {
+                        return true
+                    }
+                }
+                return false
+            }
+            for var rowIndex = worldView.rowCount - 1; 0 <= rowIndex; rowIndex-- {
+                if comboNodePositionArrayContainsPosition(NodePosition(row: rowIndex + 1, column: columnIndex + 1)) {
+                    continue
+                }
+                
+                let node: NodeLayer = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
+                let comboCount: Int = comboNodeCount(below: node)
+                if comboCount != 0 {
+                    var originRowArray: NSMutableArray = nodes.objectAtIndex(node.nodePosition.row - 1) as NSMutableArray
+                    var moveRowArray: NSMutableArray = nodes.objectAtIndex(node.nodePosition.row + comboCount - 1) as NSMutableArray
+                    moveRowArray.insertObject(node, atIndex: columnIndex)
+                    originRowArray.removeObjectAtIndex(columnIndex)
+                    node.nodePosition.row += comboCount
+                }
+            }
+            
+            // Phase 4 : Insert new nodes to TOP
+            for addNodeIndex in 0..<comboCount {
+                var nodeType: NodeLayerType
+                switch arc4random() % 6 {
+                case 0:
+                    nodeType = .RED
+                case 1:
+                    nodeType = .BLUE
+                case 2:
+                    nodeType = .YELLOW
+                case 3:
+                    nodeType = .PURPLE
+                case 4:
+                    nodeType = .GREEN
+                case 5:
+                    nodeType = .PINK
+                default:
+                    nodeType = .UNKNOWN
+                }
+                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodePosition: NodePosition(row: addNodeIndex + 1, column: columnIndex + 1))
+                worldView.layer.addSublayer(node)
+                let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
+                var animationOriginRect: CGRect = nodeRect
+                animationOriginRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
+                node.frame = CGRectInset(animationOriginRect, 5.0, 5.0)
+                var rowArray: NSMutableArray = nodes.objectAtIndex(addNodeIndex) as NSMutableArray
+                rowArray.insertObject(node, atIndex: columnIndex)
+                
+                let delay = 2.0 * CGFloat(NSEC_PER_SEC)
+                let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+                dispatch_after(time, dispatch_get_main_queue(), {
+                    CATransaction.begin()
+                    CATransaction.setAnimationDuration(1.5)
+                    node.frame = CGRectInset(nodeRect, 5.0, 5.0)
+                    CATransaction.commit()
+                })
+            }
+        }
+        
+        return true
 	}
 
 	func timerTimeOutInProgressView(progressView: ProgressView!) {

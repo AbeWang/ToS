@@ -9,7 +9,7 @@
 import QuartzCore
 import UIKit
 
-enum NodeLayerType: Int {
+enum NodeLayerType {
     case RED, BLUE, YELLOW, PURPLE, GREEN, PINK, UNKNOWN
 }
 

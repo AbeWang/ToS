@@ -15,9 +15,9 @@ class ViewController: UIViewController, ProgressViewDelegate {
     var worldView: WorldView!
     var nodes: NSMutableArray!
 
-    var tempNodeLayer: NodeLayer!
     var touchNodeLayer: NodeLayer!
     var touchNodeRect: CGRect!
+    var translucentNodeLayer: NodeLayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,8 +35,8 @@ class ViewController: UIViewController, ProgressViewDelegate {
         nodes = self.createNodes(rowCount: worldView.rowCount, columnCount: worldView.columnCount)
         self.addNodesToWorldView()
         
-        tempNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodePosition: NodePosition(row: 0, column: 0))
-        tempNodeLayer.opacity = 0.2
+        translucentNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodePosition: NodePosition(row: 0, column: 0))
+        translucentNodeLayer.opacity = 0.2
     }
     
     func createNodes(#rowCount: Int, columnCount:Int) -> NSMutableArray {
@@ -93,13 +93,14 @@ class ViewController: UIViewController, ProgressViewDelegate {
         return NodePosition(row: row, column: column)
     }
 
+    // Swap nodes
     func moveTouchNodeTo(#node: NodeLayer) {
         let touchNodePosition: NodePosition = touchNodeLayer.nodePosition
         let currentNodePosition: NodePosition = node.nodePosition
         var touchRowArray: NSMutableArray = nodes.objectAtIndex(touchNodePosition.row - 1) as NSMutableArray
         var currentRowArray: NSMutableArray = nodes.objectAtIndex(currentNodePosition.row - 1) as NSMutableArray
         
-        // Set Nodes Array
+        // Updates Node Array
         if currentNodePosition.row == touchNodePosition.row {
             currentRowArray.exchangeObjectAtIndex(touchNodePosition.column - 1, withObjectAtIndex: currentNodePosition.column - 1)
         }
@@ -112,11 +113,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
             currentRowArray.removeObjectAtIndex(currentNodePosition.column)
         }
         
-        // Set Node Position
+        // Update Node Position
         node.nodePosition = touchNodePosition
         touchNodeLayer.nodePosition = currentNodePosition
         
-        // Set Node Frame
+        // Update Node Frame
 		let currentNodeRect = node.frame
 		CATransaction.begin()
 		CATransaction.setAnimationDuration(0.1)
@@ -124,25 +125,27 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		CATransaction.commit()
         touchNodeRect = currentNodeRect
         
-        // Update Temp Node
-        tempNodeLayer.frame = touchNodeRect
-        tempNodeLayer.nodePosition = currentNodePosition
+        // Update TranslucentNodeLayer Node
+        translucentNodeLayer.frame = touchNodeRect
+        translucentNodeLayer.nodePosition = currentNodePosition
     }
 
 	func _touchesEnded() {
-		if tempNodeLayer.superlayer == nil {
+		if translucentNodeLayer.superlayer == nil {
 			return
 		}
 		progressView.timerInvalidate()
 		touchNodeLayer.frame = touchNodeRect
-		tempNodeLayer.removeFromSuperlayer()
+		translucentNodeLayer.removeFromSuperlayer()
 
-        var comboResult: Bool = self.handleComboNodes()
+        while self.handleComboNodes() {}
 	}
 
 	func handleComboNodes() -> Bool {
-
+        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
+        
 		var	comboNodePositions: [NodePosition] = []
+        var running: Bool = true
 
 		func addPositionToComboArray(position: NodePosition) {
 			for comboNodePosition in comboNodePositions {
@@ -216,6 +219,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		}
         
         if comboNodePositions.count == 0 {
+            UIApplication.sharedApplication().endIgnoringInteractionEvents()
             return false
         }
 
@@ -223,7 +227,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		for comboNodePosition in comboNodePositions {
             let node: NodeLayer = self.nodeLayer(position: comboNodePosition)
 			CATransaction.begin()
-			CATransaction.setAnimationDuration(0.5)
+			CATransaction.setAnimationDuration(0.3)
             CATransaction.setCompletionBlock({node.removeFromSuperlayer()})
 			node.hidden = true
 			CATransaction.commit()
@@ -235,11 +239,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				let node: NodeLayer! = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
 				let comboCount: Int = comboNodeCount(below: node)
 				if comboCount != 0 {
-					let delay = 1.0 * CGFloat(NSEC_PER_SEC)
+					let delay = 0.2 * CGFloat(NSEC_PER_SEC)
 					let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
 					dispatch_after(time, dispatch_get_main_queue(), {
 						CATransaction.begin()
-						CATransaction.setAnimationDuration(1.0)
+						CATransaction.setAnimationDuration(0.5)
 						var rect: CGRect = node.frame
 						rect.origin.y += CGFloat(comboCount) * self.worldView.gridHeight
 						node.frame = rect
@@ -248,7 +252,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				}
 			}
 		}
-
+        
 		// Updates node array by column
         for columnIndex in 0..<worldView.columnCount {
             // Phase 1 : Compute combo nodes count
@@ -307,37 +311,39 @@ class ViewController: UIViewController, ProgressViewDelegate {
                     nodeType = .UNKNOWN
                 }
                 let node: NodeLayer = NodeLayer(nodeType: nodeType, nodePosition: NodePosition(row: addNodeIndex + 1, column: columnIndex + 1))
-                worldView.layer.addSublayer(node)
                 let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
                 var animationOriginRect: CGRect = nodeRect
                 animationOriginRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
                 node.frame = CGRectInset(animationOriginRect, 5.0, 5.0)
+                node.hidden = true
+                worldView.layer.addSublayer(node)
+                
                 var rowArray: NSMutableArray = nodes.objectAtIndex(addNodeIndex) as NSMutableArray
                 rowArray.insertObject(node, atIndex: columnIndex)
                 
-                let delay = 2.0 * CGFloat(NSEC_PER_SEC)
+                let delay = 0.4 * CGFloat(NSEC_PER_SEC)
                 let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
                 dispatch_after(time, dispatch_get_main_queue(), {
+                    node.hidden = false
                     CATransaction.begin()
-                    CATransaction.setAnimationDuration(1.5)
+                    CATransaction.setAnimationDuration(0.5)
+                    CATransaction.setCompletionBlock({ running = false })
                     node.frame = CGRectInset(nodeRect, 5.0, 5.0)
                     CATransaction.commit()
                 })
             }
         }
+
+        while running {
+            NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate(timeIntervalSinceNow: 0.1))
+        }
         
+        UIApplication.sharedApplication().endIgnoringInteractionEvents()
         return true
 	}
 
 	func timerTimeOutInProgressView(progressView: ProgressView!) {
-		UIApplication.sharedApplication().beginIgnoringInteractionEvents()
 		self._touchesEnded()
-
-		let delay = 1.0 * CGFloat(NSEC_PER_SEC)
-		let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-		dispatch_after(time, dispatch_get_main_queue(), {
-			UIApplication.sharedApplication().endIgnoringInteractionEvents()
-		})
 	}
 
     override func touchesBegan(touches: NSSet!, withEvent event: UIEvent!) {
@@ -352,19 +358,19 @@ class ViewController: UIViewController, ProgressViewDelegate {
         touchNodeLayer = self.nodeLayer(position: touchPosition)
         touchNodeRect = touchNodeLayer.frame
         
-        if tempNodeLayer.superlayer == nil {
+        if translucentNodeLayer.superlayer == nil {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
-            tempNodeLayer.frame = touchNodeRect
+            translucentNodeLayer.frame = touchNodeRect
             CATransaction.commit()
-            tempNodeLayer.type = touchNodeLayer.type
-            tempNodeLayer.nodePosition = touchPosition
-            worldView.layer.insertSublayer(tempNodeLayer, below: touchNodeLayer)
+            translucentNodeLayer.type = touchNodeLayer.type
+            translucentNodeLayer.nodePosition = touchPosition
+            worldView.layer.insertSublayer(translucentNodeLayer, below: touchNodeLayer)
         }
     }
     
     override func touchesMoved(touches: NSSet!, withEvent event: UIEvent!) {
-        if tempNodeLayer.superlayer == nil {
+        if translucentNodeLayer.superlayer == nil {
             return
         }
         

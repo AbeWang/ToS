@@ -33,12 +33,11 @@ class ProgressView : UIView {
 		self.currentTime = timeInterval
 		self.setNeedsDisplay()
 
-		isRunning = true
-
 		if timer {
 			timer.invalidate()
 		}
 		timer = NSTimer.scheduledTimerWithTimeInterval(0.02, target: self, selector: Selector("timerAction"), userInfo: nil, repeats: true)
+		isRunning = true
 	}
 
 	func timerAction() {

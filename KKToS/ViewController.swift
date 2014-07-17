@@ -36,7 +36,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         nodes = self.createNodes(rowCount: worldView.rowCount, columnCount: worldView.columnCount)
         self.addNodesToWorldView()
         
-        translucentNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodePosition: NodePosition(row: 0, column: 0))
+        translucentNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodeLocation: NodeLocation(row: 0, column: 0))
         translucentNodeLayer.opacity = 0.2
 
 		while self.handleComboNodesAnimated(false) { NSLog("Handle combo nodes...") }
@@ -64,8 +64,8 @@ class ViewController: UIViewController, ProgressViewDelegate {
                 default:
                     nodeType = .UNKNOWN
                 }
-                let nodePosition: NodePosition = NodePosition(row: rowIndex + 1, column: columnIndex + 1)
-                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodePosition: nodePosition)
+                let nodeLocation: NodeLocation = NodeLocation(row: rowIndex + 1, column: columnIndex + 1)
+                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodeLocation: nodeLocation)
                 rowArray.addObject(node)
             }
             resultArray.addObject(rowArray)
@@ -85,40 +85,40 @@ class ViewController: UIViewController, ProgressViewDelegate {
         }
     }
     
-    func nodeLayer(#position: NodePosition) -> NodeLayer {
-        let rowArray = nodes.objectAtIndex(position.row - 1) as NSMutableArray
-        return rowArray.objectAtIndex(position.column - 1) as NodeLayer
+    func nodeLayer(#location: NodeLocation) -> NodeLayer {
+        let rowArray = nodes.objectAtIndex(location.row - 1) as NSMutableArray
+        return rowArray.objectAtIndex(location.column - 1) as NodeLayer
     }
     
-    func touchPosition(position: CGPoint) -> NodePosition {
+    func touchPosition(position: CGPoint) -> NodeLocation {
         let row: Int = Int(floor(position.y / worldView.gridHeight) + 1)
         let column: Int = Int(floor(position.x / worldView.gridHeight) + 1)
-        return NodePosition(row: row, column: column)
+        return NodeLocation(row: row, column: column)
     }
 
     // Swap nodes
     func moveTouchNodeTo(#node: NodeLayer) {
-        let touchNodePosition: NodePosition = touchNodeLayer.nodePosition
-        let currentNodePosition: NodePosition = node.nodePosition
-        var touchRowArray: NSMutableArray = nodes.objectAtIndex(touchNodePosition.row - 1) as NSMutableArray
-        var currentRowArray: NSMutableArray = nodes.objectAtIndex(currentNodePosition.row - 1) as NSMutableArray
+        let touchNodeLocation: NodeLocation = touchNodeLayer.location
+        let currentNodeLocation: NodeLocation = node.location
+        var touchRowArray: NSMutableArray = nodes.objectAtIndex(touchNodeLocation.row - 1) as NSMutableArray
+        var currentRowArray: NSMutableArray = nodes.objectAtIndex(currentNodeLocation.row - 1) as NSMutableArray
         
         // Updates Node Array
-        if currentNodePosition.row == touchNodePosition.row {
-            currentRowArray.exchangeObjectAtIndex(touchNodePosition.column - 1, withObjectAtIndex: currentNodePosition.column - 1)
+        if currentNodeLocation.row == touchNodeLocation.row {
+            currentRowArray.exchangeObjectAtIndex(touchNodeLocation.column - 1, withObjectAtIndex: currentNodeLocation.column - 1)
         }
         else {
-            let touchNode: NodeLayer = touchRowArray.objectAtIndex(touchNodePosition.column - 1) as NodeLayer
-            let currentNode: NodeLayer = currentRowArray.objectAtIndex(currentNodePosition.column - 1) as NodeLayer
-            touchRowArray.insertObject(currentNode, atIndex: touchNodePosition.column - 1)
-            currentRowArray.insertObject(touchNode, atIndex: currentNodePosition.column - 1)
-            touchRowArray.removeObjectAtIndex(touchNodePosition.column)
-            currentRowArray.removeObjectAtIndex(currentNodePosition.column)
+            let touchNode: NodeLayer = touchRowArray.objectAtIndex(touchNodeLocation.column - 1) as NodeLayer
+            let currentNode: NodeLayer = currentRowArray.objectAtIndex(currentNodeLocation.column - 1) as NodeLayer
+            touchRowArray.insertObject(currentNode, atIndex: touchNodeLocation.column - 1)
+            currentRowArray.insertObject(touchNode, atIndex: currentNodeLocation.column - 1)
+            touchRowArray.removeObjectAtIndex(touchNodeLocation.column)
+            currentRowArray.removeObjectAtIndex(currentNodeLocation.column)
         }
         
-        // Update Node Position
-        node.nodePosition = touchNodePosition
-        touchNodeLayer.nodePosition = currentNodePosition
+        // Update Node Location
+        node.location = touchNodeLocation
+        touchNodeLayer.location = currentNodeLocation
         
         // Update Node Frame
 		let currentNodeRect = node.frame
@@ -130,7 +130,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         
         // Update TranslucentNodeLayer Node
         translucentNodeLayer.frame = touchNodeRect
-        translucentNodeLayer.nodePosition = currentNodePosition
+        translucentNodeLayer.location = currentNodeLocation
     }
 
 	func _touchesEnded() {
@@ -147,24 +147,24 @@ class ViewController: UIViewController, ProgressViewDelegate {
 	func handleComboNodesAnimated(animated: Bool) -> Bool {
         UIApplication.sharedApplication().beginIgnoringInteractionEvents()
         
-		var	comboNodePositions: [NodePosition] = []
+		var	comboNodeLocations: [NodeLocation] = []
         var running: Bool = true
 
-		func addPositionToComboArray(position: NodePosition) {
-			for comboNodePosition in comboNodePositions {
-				if comboNodePosition.row == position.row && comboNodePosition.column == position.column {
+		func addLocationToComboArray(location: NodeLocation) {
+			for comboNodeLocation in comboNodeLocations {
+				if comboNodeLocation.row == location.row && comboNodeLocation.column == location.column {
 					return
 				}
 			}
-			comboNodePositions.append(position)
+			comboNodeLocations.append(location)
 		}
 
 		func comboNodeCount(below node: NodeLayer) -> Int {
 			var count: Int = 0
-			let nodePosition: NodePosition = node.nodePosition
-			for comboNodePosition in comboNodePositions {
-				if (comboNodePosition as NodePosition).column == nodePosition.column &&
-					(comboNodePosition as NodePosition).row > nodePosition.row {
+			let nodeLocation: NodeLocation = node.location
+			for comboNodeLocation in comboNodeLocations {
+				if (comboNodeLocation as NodeLocation).column == nodeLocation.column &&
+					(comboNodeLocation as NodeLocation).row > nodeLocation.row {
 						count++
 				}
 			}
@@ -175,60 +175,60 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		for rowIndex in 0..<nodes.count {
 			var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
 			for columnIndex in 0..<rowArray.count {
-				let node: NodeLayer! = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
+				let node: NodeLayer! = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
 				var nodeOne: NodeLayer!
 				var nodeTwo: NodeLayer!
 
 				// Check Right
-				if node.nodePosition.column + 2 <= worldView.columnCount {
-					nodeOne = self.nodeLayer(position: NodePosition(row: node.nodePosition.row, column: node.nodePosition.column + 1))
-					nodeTwo = self.nodeLayer(position: NodePosition(row: node.nodePosition.row, column: node.nodePosition.column + 2))
+				if node.location.column + 2 <= worldView.columnCount {
+					nodeOne = self.nodeLayer(location: NodeLocation(row: node.location.row, column: node.location.column + 1))
+					nodeTwo = self.nodeLayer(location: NodeLocation(row: node.location.row, column: node.location.column + 2))
 					if nodeOne.type == node.type && nodeTwo.type == node.type {
-						addPositionToComboArray(nodeOne.nodePosition)
-						addPositionToComboArray(nodeTwo.nodePosition)
+						addLocationToComboArray(nodeOne.location)
+						addLocationToComboArray(nodeTwo.location)
 					}
 				}
 
 				// Check Left
-				if node.nodePosition.column - 2 >= 1 {
-					nodeOne = self.nodeLayer(position: NodePosition(row: node.nodePosition.row, column: node.nodePosition.column - 1))
-					nodeTwo = self.nodeLayer(position: NodePosition(row: node.nodePosition.row, column: node.nodePosition.column - 2))
+				if node.location.column - 2 >= 1 {
+					nodeOne = self.nodeLayer(location: NodeLocation(row: node.location.row, column: node.location.column - 1))
+					nodeTwo = self.nodeLayer(location: NodeLocation(row: node.location.row, column: node.location.column - 2))
 					if nodeOne.type == node.type && nodeTwo.type == node.type {
-						addPositionToComboArray(nodeOne.nodePosition)
-						addPositionToComboArray(nodeTwo.nodePosition)
+						addLocationToComboArray(nodeOne.location)
+						addLocationToComboArray(nodeTwo.location)
 					}
 				}
 
 				// Check Up
-				if node.nodePosition.row - 2 >= 1 {
-					nodeOne = self.nodeLayer(position: NodePosition(row: node.nodePosition.row - 1, column: node.nodePosition.column))
-					nodeTwo = self.nodeLayer(position: NodePosition(row: node.nodePosition.row - 2, column: node.nodePosition.column))
+				if node.location.row - 2 >= 1 {
+					nodeOne = self.nodeLayer(location: NodeLocation(row: node.location.row - 1, column: node.location.column))
+					nodeTwo = self.nodeLayer(location: NodeLocation(row: node.location.row - 2, column: node.location.column))
 					if nodeOne.type == node.type && nodeTwo.type == node.type {
-						addPositionToComboArray(nodeOne.nodePosition)
-						addPositionToComboArray(nodeTwo.nodePosition)
+						addLocationToComboArray(nodeOne.location)
+						addLocationToComboArray(nodeTwo.location)
 					}
 				}
 
 				// Check Down
-				if node.nodePosition.row + 2 <= worldView.rowCount {
-					nodeOne = self.nodeLayer(position: NodePosition(row: node.nodePosition.row + 1, column: node.nodePosition.column))
-					nodeTwo = self.nodeLayer(position: NodePosition(row: node.nodePosition.row + 2, column: node.nodePosition.column))
+				if node.location.row + 2 <= worldView.rowCount {
+					nodeOne = self.nodeLayer(location: NodeLocation(row: node.location.row + 1, column: node.location.column))
+					nodeTwo = self.nodeLayer(location: NodeLocation(row: node.location.row + 2, column: node.location.column))
 					if nodeOne.type == node.type && nodeTwo.type == node.type {
-						addPositionToComboArray(nodeOne.nodePosition)
-						addPositionToComboArray(nodeTwo.nodePosition)
+						addLocationToComboArray(nodeOne.location)
+						addLocationToComboArray(nodeTwo.location)
 					}
 				}
 			}
 		}
         
-        if comboNodePositions.count == 0 {
+        if comboNodeLocations.count == 0 {
             UIApplication.sharedApplication().endIgnoringInteractionEvents()
             return false
         }
 
 		// Move node animations
-		for comboNodePosition in comboNodePositions {
-            let node: NodeLayer = self.nodeLayer(position: comboNodePosition)
+		for comboNodeLocation in comboNodeLocations {
+            let node: NodeLayer = self.nodeLayer(location: comboNodeLocation)
 			if animated {
 				CATransaction.begin()
 				CATransaction.setAnimationDuration(0.3)
@@ -244,7 +244,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		for rowIndex in 0..<nodes.count {
 			var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
 			for columnIndex in 0..<rowArray.count {
-				let node: NodeLayer! = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
+				let node: NodeLayer! = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
 				let comboCount: Int = comboNodeCount(below: node)
 				if comboCount != 0 {
 					if animated {
@@ -273,36 +273,36 @@ class ViewController: UIViewController, ProgressViewDelegate {
             // Phase 1 : Compute combo nodes count
             // Phase 2 : Remove combo nodes
             var comboCount: Int = 0
-            for comboNodePosition in comboNodePositions {
-                if comboNodePosition.column == columnIndex + 1 {
+            for comboNodeLocation in comboNodeLocations {
+                if comboNodeLocation.column == columnIndex + 1 {
                     comboCount++
-                    var rowArray: NSMutableArray = nodes.objectAtIndex(comboNodePosition.row - 1) as NSMutableArray
+                    var rowArray: NSMutableArray = nodes.objectAtIndex(comboNodeLocation.row - 1) as NSMutableArray
                     rowArray.removeObjectAtIndex(columnIndex)
                 }
             }
             
             // Phase 3 : 由下往上找要掉下來的node，remove 往下 insert
-            func comboNodePositionArrayContainsPosition(position: NodePosition) -> Bool {
-                for comboNodePosition in comboNodePositions {
-                    if comboNodePosition.column == position.column && comboNodePosition.row == position.row {
+            func comboNodeLocationArrayContainsLocation(location: NodeLocation) -> Bool {
+                for comboNodeLocation in comboNodeLocations {
+                    if comboNodeLocation.column == location.column && comboNodeLocation.row == location.row {
                         return true
                     }
                 }
                 return false
             }
             for var rowIndex = worldView.rowCount - 1; 0 <= rowIndex; rowIndex-- {
-                if comboNodePositionArrayContainsPosition(NodePosition(row: rowIndex + 1, column: columnIndex + 1)) {
+                if comboNodeLocationArrayContainsLocation(NodeLocation(row: rowIndex + 1, column: columnIndex + 1)) {
                     continue
                 }
                 
-                let node: NodeLayer = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
+                let node: NodeLayer = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
                 let comboCount: Int = comboNodeCount(below: node)
                 if comboCount != 0 {
-                    var originRowArray: NSMutableArray = nodes.objectAtIndex(node.nodePosition.row - 1) as NSMutableArray
-                    var moveRowArray: NSMutableArray = nodes.objectAtIndex(node.nodePosition.row + comboCount - 1) as NSMutableArray
+                    var originRowArray: NSMutableArray = nodes.objectAtIndex(node.location.row - 1) as NSMutableArray
+                    var moveRowArray: NSMutableArray = nodes.objectAtIndex(node.location.row + comboCount - 1) as NSMutableArray
                     moveRowArray.insertObject(node, atIndex: columnIndex)
                     originRowArray.removeObjectAtIndex(columnIndex)
-                    node.nodePosition.row += comboCount
+                    node.location.row += comboCount
                 }
             }
             
@@ -325,7 +325,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
                 default:
                     nodeType = .UNKNOWN
                 }
-                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodePosition: NodePosition(row: addNodeIndex + 1, column: columnIndex + 1))
+                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
                 let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
                 var animationOriginRect: CGRect = nodeRect
                 animationOriginRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
@@ -370,14 +370,14 @@ class ViewController: UIViewController, ProgressViewDelegate {
 
     override func touchesBegan(touches: NSSet!, withEvent event: UIEvent!) {
         let touch: UITouch = touches.anyObject() as UITouch
-        var touchLocation: CGPoint = touch.locationInView(worldView)
+        var touchPosition: CGPoint = touch.locationInView(worldView)
         
-        if touchLocation.y < 0 {
+        if touchPosition.y < 0 {
             return
         }
         
-        let touchPosition: NodePosition = self.touchPosition(touchLocation)
-        touchNodeLayer = self.nodeLayer(position: touchPosition)
+        let touchLocation: NodeLocation = self.touchPosition(touchPosition)
+        touchNodeLayer = self.nodeLayer(location: touchLocation)
         touchNodeRect = touchNodeLayer.frame
         
         if translucentNodeLayer.superlayer == nil {
@@ -386,7 +386,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
             translucentNodeLayer.frame = touchNodeRect
             CATransaction.commit()
             translucentNodeLayer.type = touchNodeLayer.type
-            translucentNodeLayer.nodePosition = touchPosition
+            translucentNodeLayer.location = touchLocation
             worldView.layer.insertSublayer(translucentNodeLayer, below: touchNodeLayer)
         }
     }
@@ -397,28 +397,28 @@ class ViewController: UIViewController, ProgressViewDelegate {
         }
         
         let touch: UITouch = touches.anyObject() as UITouch
-        var touchLocation: CGPoint = touch.locationInView(worldView)
+        var touchPosition: CGPoint = touch.locationInView(worldView)
         var nodeRect: CGRect = touchNodeLayer.frame
-        nodeRect.origin.x = touchLocation.x - nodeRect.size.width / 2
-        nodeRect.origin.y = touchLocation.y - nodeRect.size.width / 2
+        nodeRect.origin.x = touchPosition.x - nodeRect.size.width / 2
+        nodeRect.origin.y = touchPosition.y - nodeRect.size.width / 2
         
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         touchNodeLayer.frame = nodeRect
         CATransaction.commit()
         
-        if touchLocation.y < 0 {
-           touchLocation.y = 0
+        if touchPosition.y < 0 {
+           touchPosition.y = 0
         }
         
-        let currentNodePosition: NodePosition = self.touchPosition(touchLocation)
-        if currentNodePosition.row != touchNodeLayer.nodePosition.row ||
-           currentNodePosition.column != touchNodeLayer.nodePosition.column {
+        let currentNodeLocation: NodeLocation = self.touchPosition(touchPosition)
+        if currentNodeLocation.row != touchNodeLayer.location.row ||
+           currentNodeLocation.column != touchNodeLayer.location.column {
 
 			if !progressView.isRunning {
 				progressView.startCountingDownWithTimeInterval(6.0)
 			}
-            self.moveTouchNodeTo(node: self.nodeLayer(position: currentNodePosition))
+            self.moveTouchNodeTo(node: self.nodeLayer(location: currentNodeLocation))
         }
     }
     

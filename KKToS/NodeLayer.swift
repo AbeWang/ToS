@@ -13,21 +13,21 @@ enum NodeLayerType {
     case RED, BLUE, YELLOW, PURPLE, GREEN, PINK, UNKNOWN
 }
 
-struct NodePosition {
+struct NodeLocation {
     var row: Int = 0
     var column: Int = 0
 }
 
 class NodeLayer: CALayer {
     var _type: NodeLayerType = .UNKNOWN
-    var _nodePosition: NodePosition = NodePosition()
+    var _nodeLocation: NodeLocation = NodeLocation()
     
-    var nodePosition: NodePosition {
+    var location: NodeLocation {
         get {
-            return _nodePosition
+            return _nodeLocation
         }
         set {
-            _nodePosition = newValue
+            _nodeLocation = newValue
         }
     }
     
@@ -58,24 +58,21 @@ class NodeLayer: CALayer {
         }
     }
     
-    init(nodeType: NodeLayerType, nodePosition: NodePosition) {
+    init(nodeType: NodeLayerType, nodeLocation: NodeLocation) {
         super.init()
         self._init()
         self.type = nodeType
-        self.nodePosition = nodePosition
+        self.location = nodeLocation
 
 		// Shake
 		var animation: CABasicAnimation = CABasicAnimation(keyPath: "transform.rotation")
-		switch arc4random() % 2 {
-		case 0:
-			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
+		if arc4random() % 2 == 0 {
 			animation.fromValue = NSNumber.numberWithDouble(M_PI/16)
-		case 1:
-			animation.toValue = NSNumber.numberWithDouble(M_PI/16)
+			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
+		}
+		else {
 			animation.fromValue = NSNumber.numberWithDouble(-M_PI/16)
-		default:
-			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
-			animation.fromValue = NSNumber.numberWithDouble(M_PI/16)
+			animation.toValue = NSNumber.numberWithDouble(M_PI/16)
 		}
 		animation.duration = 0.2
 		animation.repeatCount = Float(NSUIntegerMax)

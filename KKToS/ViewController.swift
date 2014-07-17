@@ -21,6 +21,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+		self.view.backgroundColor = UIColor.lightGrayColor()
 
         worldView = WorldView(frame: CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.bounds), 0.0), rowCount: 5, columnCount: 6)
         var worldRect: CGRect = worldView.frame
@@ -37,6 +38,8 @@ class ViewController: UIViewController, ProgressViewDelegate {
         
         translucentNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodePosition: NodePosition(row: 0, column: 0))
         translucentNodeLayer.opacity = 0.2
+
+		while self.handleComboNodesAnimated(false) { NSLog("Handle combo nodes...") }
     }
     
     func createNodes(#rowCount: Int, columnCount:Int) -> NSMutableArray {
@@ -138,10 +141,10 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		touchNodeLayer.frame = touchNodeRect
 		translucentNodeLayer.removeFromSuperlayer()
 
-        while self.handleComboNodes() {}
+        while self.handleComboNodesAnimated(true) { NSLog("Handle combo nodes...") }
 	}
 
-	func handleComboNodes() -> Bool {
+	func handleComboNodesAnimated(animated: Bool) -> Bool {
         UIApplication.sharedApplication().beginIgnoringInteractionEvents()
         
 		var	comboNodePositions: [NodePosition] = []
@@ -226,11 +229,16 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		// Move node animations
 		for comboNodePosition in comboNodePositions {
             let node: NodeLayer = self.nodeLayer(position: comboNodePosition)
-			CATransaction.begin()
-			CATransaction.setAnimationDuration(0.3)
-            CATransaction.setCompletionBlock({node.removeFromSuperlayer()})
-			node.hidden = true
-			CATransaction.commit()
+			if animated {
+				CATransaction.begin()
+				CATransaction.setAnimationDuration(0.3)
+				CATransaction.setCompletionBlock({ node.removeFromSuperlayer() })
+				node.frame = CGRectInset(node.frame, CGRectGetWidth(node.frame) / 2, CGRectGetWidth(node.frame) / 2)
+				CATransaction.commit()
+			}
+			else {
+				node.removeFromSuperlayer()
+			}
 		}
 
 		for rowIndex in 0..<nodes.count {
@@ -239,16 +247,23 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				let node: NodeLayer! = self.nodeLayer(position: NodePosition(row: rowIndex + 1, column: columnIndex + 1))
 				let comboCount: Int = comboNodeCount(below: node)
 				if comboCount != 0 {
-					let delay = 0.2 * CGFloat(NSEC_PER_SEC)
-					let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-					dispatch_after(time, dispatch_get_main_queue(), {
-						CATransaction.begin()
-						CATransaction.setAnimationDuration(0.5)
+					if animated {
+						let delay = 0.2 * CGFloat(NSEC_PER_SEC)
+						let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+						dispatch_after(time, dispatch_get_main_queue(), {
+							CATransaction.begin()
+							CATransaction.setAnimationDuration(0.5)
+							var rect: CGRect = node.frame
+							rect.origin.y += CGFloat(comboCount) * self.worldView.gridHeight
+							node.frame = rect
+							CATransaction.commit()
+						})
+					}
+					else {
 						var rect: CGRect = node.frame
 						rect.origin.y += CGFloat(comboCount) * self.worldView.gridHeight
 						node.frame = rect
-						CATransaction.commit()
-						})
+					}
 				}
 			}
 		}
@@ -320,17 +335,24 @@ class ViewController: UIViewController, ProgressViewDelegate {
                 
                 var rowArray: NSMutableArray = nodes.objectAtIndex(addNodeIndex) as NSMutableArray
                 rowArray.insertObject(node, atIndex: columnIndex)
-                
-                let delay = 0.4 * CGFloat(NSEC_PER_SEC)
-                let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-                dispatch_after(time, dispatch_get_main_queue(), {
-                    node.hidden = false
-                    CATransaction.begin()
-                    CATransaction.setAnimationDuration(0.5)
-                    CATransaction.setCompletionBlock({ running = false })
-                    node.frame = CGRectInset(nodeRect, 5.0, 5.0)
-                    CATransaction.commit()
-                })
+
+				if animated {
+					let delay = 0.4 * CGFloat(NSEC_PER_SEC)
+					let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+					dispatch_after(time, dispatch_get_main_queue(), {
+						node.hidden = false
+						CATransaction.begin()
+						CATransaction.setAnimationDuration(0.5)
+						CATransaction.setCompletionBlock({ running = false })
+						node.frame = CGRectInset(nodeRect, 5.0, 5.0)
+						CATransaction.commit()
+					})
+				}
+				else {
+					node.hidden = false
+					node.frame = CGRectInset(nodeRect, 5.0, 5.0)
+					running = false
+				}
             }
         }
 

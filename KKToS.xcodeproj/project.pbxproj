@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		301AAEF8196EE27000F4F6B3 /* NodeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 301AAEF7196EE27000F4F6B3 /* NodeLayer.swift */; };
 		301AAEFA196EE33100F4F6B3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 301AAEF9196EE33100F4F6B3 /* QuartzCore.framework */; };
+		304924091977CDCB002A6C87 /* NodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304924081977CDCB002A6C87 /* NodeManager.swift */; };
 		3055D8E41973922C00EC39DF /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3055D8E31973922C00EC39DF /* ProgressView.swift */; };
 		30B91512196C3E5800DD56E5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B91511196C3E5800DD56E5 /* AppDelegate.swift */; };
 		30B91514196C3E5800DD56E5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B91513196C3E5800DD56E5 /* ViewController.swift */; };
@@ -31,6 +32,7 @@
 /* Begin PBXFileReference section */
 		301AAEF7196EE27000F4F6B3 /* NodeLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeLayer.swift; sourceTree = "<group>"; };
 		301AAEF9196EE33100F4F6B3 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		304924081977CDCB002A6C87 /* NodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NodeManager.swift; sourceTree = "<group>"; };
 		3055D8E31973922C00EC39DF /* ProgressView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		30B9150C196C3E5800DD56E5 /* KKToS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KKToS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30B91510196C3E5800DD56E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				30B91511196C3E5800DD56E5 /* AppDelegate.swift */,
+				304924081977CDCB002A6C87 /* NodeManager.swift */,
 				30B91513196C3E5800DD56E5 /* ViewController.swift */,
 				30B9152E196C410900DD56E5 /* WorldView.swift */,
 				3055D8E31973922C00EC39DF /* ProgressView.swift */,
@@ -222,6 +225,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				30B91514196C3E5800DD56E5 /* ViewController.swift in Sources */,
+				304924091977CDCB002A6C87 /* NodeManager.swift in Sources */,
 				301AAEF8196EE27000F4F6B3 /* NodeLayer.swift in Sources */,
 				3055D8E41973922C00EC39DF /* ProgressView.swift in Sources */,
 				30B91512196C3E5800DD56E5 /* AppDelegate.swift in Sources */,

@@ -63,8 +63,26 @@ class NodeLayer: CALayer {
         self._init()
         self.type = nodeType
         self.nodePosition = nodePosition
+
+		// Shake
+		var animation: CABasicAnimation = CABasicAnimation(keyPath: "transform.rotation")
+		switch arc4random() % 2 {
+		case 0:
+			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
+			animation.fromValue = NSNumber.numberWithDouble(M_PI/16)
+		case 1:
+			animation.toValue = NSNumber.numberWithDouble(M_PI/16)
+			animation.fromValue = NSNumber.numberWithDouble(-M_PI/16)
+		default:
+			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
+			animation.fromValue = NSNumber.numberWithDouble(M_PI/16)
+		}
+		animation.duration = 0.2
+		animation.repeatCount = Float(NSUIntegerMax)
+		animation.autoreverses = true
+		self.addAnimation(animation, forKey: "nodeShake")
     }
-    
+
     init(layer: AnyObject!) {
         super.init(layer: layer)
     }

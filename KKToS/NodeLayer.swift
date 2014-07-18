@@ -64,15 +64,16 @@ class NodeLayer: CALayer {
         self.type = nodeType
         self.location = nodeLocation
 
-		// Shake
+		// Shake Animation
+		let value: Double = M_PI/16
 		var animation: CABasicAnimation = CABasicAnimation(keyPath: "transform.rotation")
 		if arc4random() % 2 == 0 {
-			animation.fromValue = NSNumber.numberWithDouble(M_PI/16)
-			animation.toValue = NSNumber.numberWithDouble(-M_PI/16)
+			animation.fromValue = NSNumber.numberWithDouble(value)
+			animation.toValue = NSNumber.numberWithDouble(-value)
 		}
 		else {
-			animation.fromValue = NSNumber.numberWithDouble(-M_PI/16)
-			animation.toValue = NSNumber.numberWithDouble(M_PI/16)
+			animation.fromValue = NSNumber.numberWithDouble(-value)
+			animation.toValue = NSNumber.numberWithDouble(value)
 		}
 		animation.duration = 0.2
 		animation.repeatCount = Float(NSUIntegerMax)

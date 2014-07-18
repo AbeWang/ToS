@@ -18,7 +18,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
     var translucentNodeLayer: NodeLayer!
     var touchNodeRect: CGRect!
     
-    var nodeManager: NodeManager = NodeManager()
+    let nodeManager: NodeManager = NodeManager()
     var nodes: NSMutableArray!
     
     override func viewDidLoad() {
@@ -27,7 +27,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 
         worldView = WorldView(frame: CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.bounds), 0.0), rowCount: 5, columnCount: 6)
         var worldRect: CGRect = worldView.frame
-        worldRect.origin.y = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(worldRect)
+        worldRect.origin.y = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(worldView.frame)
         worldView.frame = worldRect
         self.view.addSubview(worldView)
 
@@ -35,9 +35,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		progressView.delegate = self
 		self.view.addSubview(progressView)
 
+		// 把亂數產生的 Node 放到 worldView 上的適當位置
         nodes = nodeManager.createNodes(rowCount: worldView.rowCount, columnCount: worldView.columnCount)
         self.addNodesToWorldView()
-        
+
+		// translucent node 目的是用一個半透明的 node 來看目前的滑動位置
         translucentNodeLayer = NodeLayer(nodeType: .UNKNOWN, nodeLocation: NodeLocation(row: 0, column: 0))
         translucentNodeLayer.opacity = 0.2
 
@@ -270,24 +272,8 @@ class ViewController: UIViewController, ProgressViewDelegate {
             
             // Phase 4 : 建立新落珠，由上往下掉落來填滿畫面
             for addNodeIndex in 0..<comboCount {
-                var nodeType: NodeLayerType
-                switch arc4random() % 6 {
-                case 0:
-                    nodeType = .RED
-                case 1:
-                    nodeType = .BLUE
-                case 2:
-                    nodeType = .YELLOW
-                case 3:
-                    nodeType = .PURPLE
-                case 4:
-                    nodeType = .GREEN
-                case 5:
-                    nodeType = .PINK
-                default:
-                    nodeType = .UNKNOWN
-                }
-                let node: NodeLayer = NodeLayer(nodeType: nodeType, nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
+				let nodeTypeArray: [NodeLayerType] = [.RED, .BLUE, .YELLOW, .PURPLE, .GREEN, .PINK]
+                let node: NodeLayer = NodeLayer(nodeType: nodeTypeArray[Int(arc4random() % 6)], nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
                 let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
                 var animationOriginRect: CGRect = nodeRect
                 animationOriginRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
@@ -334,6 +320,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         if translucentNodeLayer.superlayer == nil {
             return
         }
+
         progressView.timerInvalidate()
         touchNodeLayer.frame = touchNodeRect
         translucentNodeLayer.removeFromSuperlayer()

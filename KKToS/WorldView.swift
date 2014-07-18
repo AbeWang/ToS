@@ -15,10 +15,10 @@ class WorldView : UIView {
     
     init(frame: CGRect, rowCount: Int, columnCount: Int) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.clearColor()
         self.rowCount = rowCount
         self.columnCount = columnCount
         self.gridHeight = CGRectGetWidth(frame) / CGFloat(columnCount)
+		self.backgroundColor = UIColor.clearColor()
         self.frame = CGRectMake(frame.origin.x, frame.origin.y, CGRectGetWidth(frame), gridHeight * CGFloat(rowCount))
     }
     

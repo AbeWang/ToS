@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WorldView : UIView {
+class WorldView: UIView {
     var rowCount: Int = 5
     var columnCount: Int = 6
     let gridHeight: CGFloat = 50.0

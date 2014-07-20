@@ -10,6 +10,7 @@ import Foundation
 
 class NodeManager {
 
+    /* 建立 row x column 個 nodes */
     func createNodes(#rowCount: Int, columnCount:Int) -> NSMutableArray {
         var resultArray: NSMutableArray = NSMutableArray()
         for rowIndex in 0..<rowCount {

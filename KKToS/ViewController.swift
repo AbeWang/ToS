@@ -10,7 +10,6 @@ import UIKit
 import QuartzCore
 
 class ViewController: UIViewController, ProgressViewDelegate {
-
 	var progressView: ProgressView!
     var worldView: WorldView!
 
@@ -47,6 +46,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		while handleComboNodesAnimated(false) { NSLog("Handle combo nodes...") }
     }
 
+    /* 把 Nodes 加入到 world view 上 */
     func addNodesToWorldView() {
         for rowIndex in 0..<worldView.rowCount {
             var rowArray: NSMutableArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
@@ -59,24 +59,27 @@ class ViewController: UIViewController, ProgressViewDelegate {
         }
     }
     
+    /* 取得 nodes 中某一個 location 的 node */
     func nodeLayer(#location: NodeLocation) -> NodeLayer {
         let rowArray = nodes.objectAtIndex(location.row - 1) as NSMutableArray
         return rowArray.objectAtIndex(location.column - 1) as NodeLayer
     }
     
+    /* 把 worldView 中手指按下的位置轉換成 Node Location */
     func nodeLocationInWorldView(position: CGPoint) -> NodeLocation {
         let row: Int = Int(floor(position.y / worldView.gridHeight) + 1)
         let column: Int = Int(floor(position.x / worldView.gridHeight) + 1)
         return NodeLocation(row: row, column: column)
     }
 
+    /* 讓某個 node 與 touch node 彼此交換位置 */
     func swapNodeWithTouchNode(node: NodeLayer) {
         let touchNodeLocation: NodeLocation = touchNodeLayer.location
         let currentNodeLocation: NodeLocation = node.location
         var touchRowArray: NSMutableArray = nodes.objectAtIndex(touchNodeLocation.row - 1) as NSMutableArray
         var currentRowArray: NSMutableArray = nodes.objectAtIndex(currentNodeLocation.row - 1) as NSMutableArray
         
-        // Updates Node Array
+        // 更新兩個 node 在 nodes array 中的位置
         if currentNodeLocation.row == touchNodeLocation.row {
             currentRowArray.exchangeObjectAtIndex(touchNodeLocation.column - 1, withObjectAtIndex: currentNodeLocation.column - 1)
         }
@@ -88,11 +91,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
             currentRowArray.removeObjectAtIndex(currentNodeLocation.column)
         }
         
-        // Updates Node Location
+        // 更新兩個 node 的 location
         node.location = touchNodeLocation
         touchNodeLayer.location = currentNodeLocation
         
-        // Updates Node Frame
+        // 更新兩個 node 的 frame
 		let currentNodeRect = node.frame
 		CATransaction.begin()
 		CATransaction.setAnimationDuration(0.1)
@@ -100,17 +103,16 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		CATransaction.commit()
         touchNodeRect = currentNodeRect
         
-        // Updates Translucent Node Frame
+        // 移動半透明 Node 的位置
         translucentNodeLayer.frame = touchNodeRect
         translucentNodeLayer.location = touchNodeLayer.location
     }
 
+    /* 消除目前 world view 畫面上的 combo nodes */
+    /* 回傳 true 表示有消除 combo nodes，false 則表示畫面上無 combo nodes */
 	func handleComboNodesAnimated(animated: Bool) -> Bool {
-        
 		var	comboNodeLocations: [NodeLocation] = []
         var running: Bool = true
-        
-        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
 
 		func addLocation(location: NodeLocation) {
 			for comboNodeLocation in comboNodeLocations {
@@ -121,6 +123,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			comboNodeLocations.append(location)
 		}
 
+        // 計算某 node 下面有幾個 combo nodes
 		func comboNodeCount(below node: NodeLayer) -> Int {
 			var count: Int = 0
 			let nodeLocation: NodeLocation = node.location
@@ -133,6 +136,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			return count
 		}
         
+        // 檢查 combo node array 中是否有包含某個 location 的 node
         func comboNodeLocationArrayContainsLocation(location: NodeLocation) -> Bool {
             for comboNodeLocation in comboNodeLocations {
                 if comboNodeLocation.column == location.column && comboNodeLocation.row == location.row {
@@ -141,8 +145,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
             }
             return false
         }
+        
+        // 鎖住畫面不讓使用者移動
+        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
 
-        // Compute Combo Node Count in worldView
+        // 找出目前 world view 中的所有 combo nodes 並加入到 array 中
 		for rowIndex in 0..<nodes.count {
 			var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
 			for columnIndex in 0..<rowArray.count {
@@ -150,7 +157,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				var comboNodeTwo: NodeLayer!
 				var comboNodeThree: NodeLayer!
 
-				// Check Right Combo Nodes
+				// 檢查 comboNodeOne 右邊的兩顆是否為相同的 type
 				if comboNodeOne.location.column + 2 <= worldView.columnCount {
 					comboNodeTwo = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row, column: comboNodeOne.location.column + 1))
 					comboNodeThree = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row, column: comboNodeOne.location.column + 2))
@@ -160,7 +167,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 					}
 				}
 
-				// Check Left Combo Nodes
+				// 檢查 comboNodeOne 左邊的兩顆是否為相同的 type
 				if comboNodeOne.location.column - 2 >= 1 {
 					comboNodeTwo = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row, column: comboNodeOne.location.column - 1))
 					comboNodeThree = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row, column: comboNodeOne.location.column - 2))
@@ -170,7 +177,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 					}
 				}
 
-				// Check Up Combo Nodes
+				// 檢查 comboNodeOne 上方的兩顆是否為相同的 type
 				if comboNodeOne.location.row - 2 >= 1 {
 					comboNodeTwo = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row - 1, column: comboNodeOne.location.column))
 					comboNodeThree = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row - 2, column: comboNodeOne.location.column))
@@ -180,7 +187,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 					}
 				}
 
-				// Check Down Combo Nodes
+				// 檢查 comboNodeOne 下方的兩顆是否為相同的 type
 				if comboNodeOne.location.row + 2 <= worldView.rowCount {
 					comboNodeTwo = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row + 1, column: comboNodeOne.location.column))
 					comboNodeThree = self.nodeLayer(location: NodeLocation(row: comboNodeOne.location.row + 2, column: comboNodeOne.location.column))
@@ -192,6 +199,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			}
 		}
         
+        // 若沒有 combo node 則結束此回合
         if comboNodeLocations.count == 0 {
             UIApplication.sharedApplication().endIgnoringInteractionEvents()
             return false
@@ -275,9 +283,9 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				let nodeTypeArray: [NodeLayerType] = [.RED, .BLUE, .YELLOW, .PURPLE, .GREEN, .PINK]
                 let node: NodeLayer = NodeLayer(nodeType: nodeTypeArray[Int(arc4random() % 6)], nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
                 let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
-                var animationOriginRect: CGRect = nodeRect
-                animationOriginRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
-                node.frame = CGRectInset(animationOriginRect, 5.0, 5.0)
+                var animationRect: CGRect = nodeRect
+                animationRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
+                node.frame = CGRectInset(animationRect, 5.0, 5.0)
                 node.hidden = true
                 worldView.layer.addSublayer(node)
                 
@@ -304,6 +312,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
             }
         }
 
+        // 用 runloop 先卡住，一直等到 running tag 變為 false 後再繼續往下走
         while running {
             NSRunLoop.currentRunLoop().runMode(NSDefaultRunLoopMode, beforeDate: NSDate(timeIntervalSinceNow: 0.1))
         }
@@ -312,6 +321,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         return true
 	}
 
+    /* ProgressView Delegate */
 	func timerTimeOutInProgressView(progressView: ProgressView!) {
 		self._touchesEnded()
 	}
@@ -321,10 +331,12 @@ class ViewController: UIViewController, ProgressViewDelegate {
             return
         }
 
+        // Touch 時間結束後，把 touch node 移回到最後的置換位置
         progressView.timerInvalidate()
         touchNodeLayer.frame = touchNodeRect
         translucentNodeLayer.removeFromSuperlayer()
         
+        // 檢查 combo nodes 並消除，一直到沒有 combo 為止
         while handleComboNodesAnimated(true) { NSLog("Handle combo nodes...") }
     }
 
@@ -346,7 +358,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
             translucentNodeLayer.frame = touchNodeRect
             CATransaction.commit()
             translucentNodeLayer.type = touchNodeLayer.type
-            translucentNodeLayer.location = touchLocation
+            translucentNodeLayer.location = touchNodeLayer.location
             worldView.layer.insertSublayer(translucentNodeLayer, below: touchNodeLayer)
         }
     }
@@ -371,10 +383,12 @@ class ViewController: UIViewController, ProgressViewDelegate {
            touchPosition.y = 0
         }
         
+        // 檢查 touch node 目前的 location 是否有移動到其它地方
         let currentNodeLocation: NodeLocation = self.nodeLocationInWorldView(touchPosition)
         if currentNodeLocation.row != touchNodeLayer.location.row ||
            currentNodeLocation.column != touchNodeLayer.location.column {
 
+            // 若 progress 還沒有進行秒數倒數，則開始倒數 6 秒
 			if !progressView.isRunning {
 				progressView.startCountingDownWithTimeInterval(6.0)
 			}

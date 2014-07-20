@@ -9,12 +9,12 @@
 import Foundation
 import UIKit
 
-@objc protocol ProgressViewDelegate : NSObjectProtocol {
+/* ProgressView Delegate Functions */
+@objc protocol ProgressViewDelegate: NSObjectProtocol {
 	@optional func timerTimeOutInProgressView(progressView: ProgressView!)
 }
 
-class ProgressView : UIView {
-
+class ProgressView: UIView {
 	var delegate: ProgressViewDelegate!
 	var timer: NSTimer!
 	var currentTime: NSTimeInterval = 10.0
@@ -28,6 +28,7 @@ class ProgressView : UIView {
 		self.backgroundColor = UIColor.grayColor()
 	}
 
+    /* 開始倒數 */
 	func startCountingDownWithTimeInterval(timeInterval: NSTimeInterval) {
 		self.countingDownTimeInterval = timeInterval
 		self.currentTime = timeInterval
@@ -40,6 +41,7 @@ class ProgressView : UIView {
 		isRunning = true
 	}
 
+    /* timer action */
 	func timerAction() {
 		if currentTime <= 0.0 {
 			self.timerInvalidate()
@@ -52,6 +54,7 @@ class ProgressView : UIView {
 		self.setNeedsDisplay()
 	}
 
+    /* 結束倒數 */
 	func timerInvalidate() {
 		if timer {
 			timer.invalidate()

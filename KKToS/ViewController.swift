@@ -227,7 +227,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 				let comboCount: Int = comboNodeCount(below: node)
 				if comboCount != 0 {
 					if animated {
-						let delay = 0.2 * CGFloat(NSEC_PER_SEC)
+						let delay = 0.2 * Float(NSEC_PER_SEC)
 						let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
 						dispatch_after(time, dispatch_get_main_queue(), {
 							CATransaction.begin()
@@ -293,7 +293,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
                 rowArray.insertObject(node, atIndex: columnIndex)
 
 				if animated {
-					let delay = 0.4 * CGFloat(NSEC_PER_SEC)
+					let delay = 0.4 * Float(NSEC_PER_SEC)
 					let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
 					dispatch_after(time, dispatch_get_main_queue(), {
 						node.hidden = false

@@ -11,7 +11,7 @@ import UIKit
 
 /* ProgressView Delegate Functions */
 @objc protocol ProgressViewDelegate: NSObjectProtocol {
-	@optional func timerTimeOutInProgressView(progressView: ProgressView!)
+	optional func timerTimeOutInProgressView(progressView: ProgressView!)
 }
 
 class ProgressView: UIView {

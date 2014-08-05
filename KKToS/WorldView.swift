@@ -12,7 +12,11 @@ class WorldView: UIView {
     var rowCount: Int = 5
     var columnCount: Int = 6
     let gridHeight: CGFloat = 50.0
-    
+
+	required init(coder aDecoder: NSCoder!) {
+		super.init(coder: aDecoder)
+	}
+
     init(frame: CGRect, rowCount: Int, columnCount: Int) {
         super.init(frame: frame)
         self.rowCount = rowCount

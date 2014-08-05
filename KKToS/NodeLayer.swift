@@ -63,28 +63,16 @@ class NodeLayer: CALayer {
         self._init()
         self.type = nodeType
         self.location = nodeLocation
-
-		// Shake Animation
-//		let value: Double = M_PI/16
-//		var animation: CABasicAnimation = CABasicAnimation(keyPath: "transform.rotation")
-//		if arc4random() % 2 == 0 {
-//			animation.fromValue = NSNumber.numberWithDouble(value)
-//			animation.toValue = NSNumber.numberWithDouble(-value)
-//		}
-//		else {
-//			animation.fromValue = NSNumber.numberWithDouble(-value)
-//			animation.toValue = NSNumber.numberWithDouble(value)
-//		}
-//		animation.duration = 0.2
-//		animation.repeatCount = Float(NSUIntegerMax)
-//		animation.autoreverses = true
-//		self.addAnimation(animation, forKey: "nodeShake")
     }
 
-    init(layer: AnyObject!) {
-        super.init(layer: layer)
-    }
-    
+	required init(coder aDecoder: NSCoder!) {
+		super.init(coder: aDecoder)
+	}
+
+	override init(layer: AnyObject!) {
+		super.init(layer: layer)
+	}
+
     func _init() {
         self.contentsScale = UIScreen.mainScreen().scale
         self.cornerRadius = 12

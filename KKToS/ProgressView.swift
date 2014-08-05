@@ -21,7 +21,11 @@ class ProgressView: UIView {
 	var countingDownTimeInterval: NSTimeInterval = 10.0
 	var isRunning: Bool = false
 
-	init(frame: CGRect) {
+	required init(coder aDecoder: NSCoder!) {
+		super.init(coder: aDecoder)
+	}
+
+	override init(frame: CGRect) {
 		super.init(frame: frame)
 		self.layer.borderWidth = 1.0
 		self.layer.borderColor = UIColor.blackColor().CGColor
@@ -34,7 +38,7 @@ class ProgressView: UIView {
 		self.currentTime = timeInterval
 		self.setNeedsDisplay()
 
-		if timer {
+		if timer != nil {
 			timer.invalidate()
 		}
 		timer = NSTimer.scheduledTimerWithTimeInterval(0.02, target: self, selector: Selector("timerAction"), userInfo: nil, repeats: true)
@@ -56,7 +60,7 @@ class ProgressView: UIView {
 
     /* 結束倒數 */
 	func timerInvalidate() {
-		if timer {
+		if timer != nil {
 			timer.invalidate()
 			isRunning = false
 			currentTime = countingDownTimeInterval

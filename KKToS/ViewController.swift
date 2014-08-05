@@ -98,7 +98,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         // 更新兩個 node 的 frame
 		let currentNodeRect = node.frame
 		CATransaction.begin()
-		CATransaction.setAnimationDuration(0.1)
+		CATransaction.setAnimationDuration(0.15)
         node.frame = touchNodeRect
 		CATransaction.commit()
         touchNodeRect = currentNodeRect

@@ -14,13 +14,13 @@ enum NodeLayerType {
 }
 
 struct NodeLocation {
-    var row: Int = 0
-    var column: Int = 0
+    var row = 0
+    var column = 0
 }
 
 class NodeLayer: CALayer {
-    var _type: NodeLayerType = .UNKNOWN
-    var _nodeLocation: NodeLocation = NodeLocation()
+    var _type = NodeLayerType.UNKNOWN
+    var _nodeLocation = NodeLocation()
     
     var location: NodeLocation {
         get {

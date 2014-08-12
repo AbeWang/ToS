@@ -9,9 +9,9 @@
 import UIKit
 
 class WorldView: UIView {
-    var rowCount: Int = 5
-    var columnCount: Int = 6
-    let gridHeight: CGFloat = 50.0
+    var rowCount = 5
+    var columnCount = 6
+    let gridHeight = CGFloat(50.0)
 
 	required init(coder aDecoder: NSCoder!) {
 		super.init(coder: aDecoder)
@@ -30,8 +30,8 @@ class WorldView: UIView {
         super.drawRect(rect)
         for var row = 0; row < rowCount; ++row {
             for var column = 0; column < columnCount; ++column {
-                let pathRect: CGRect = CGRectMake(gridHeight * CGFloat(column), gridHeight * CGFloat(row), gridHeight, gridHeight)
-                let path: UIBezierPath = UIBezierPath(rect: pathRect)
+                let pathRect = CGRectMake(gridHeight * CGFloat(column), gridHeight * CGFloat(row), gridHeight, gridHeight)
+                let path = UIBezierPath(rect: pathRect)
                 if (column + row) % 2 == 0 {
                     UIColor(red: 0.133, green: 0.075, blue: 0.04, alpha: 1.0).set()
                 }

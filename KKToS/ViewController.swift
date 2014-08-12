@@ -17,7 +17,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
     var translucentNodeLayer: NodeLayer!
     var touchNodeRect: CGRect!
     
-    let nodeManager: NodeManager = NodeManager()
+    let nodeManager = NodeManager()
     var nodes: NSMutableArray!
     
     override func viewDidLoad() {
@@ -25,7 +25,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 		self.view.backgroundColor = UIColor.lightGrayColor()
 
         worldView = WorldView(frame: CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.bounds), 0.0), rowCount: 5, columnCount: 6)
-        var worldRect: CGRect = worldView.frame
+        var worldRect = worldView.frame
         worldRect.origin.y = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(worldView.frame)
         worldView.frame = worldRect
         self.view.addSubview(worldView)
@@ -49,10 +49,10 @@ class ViewController: UIViewController, ProgressViewDelegate {
     /* 把 Nodes 加入到 world view 上 */
     func addNodesToWorldView() {
         for rowIndex in 0..<worldView.rowCount {
-            var rowArray: NSMutableArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
+            var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
             for columnIndex in 0..<worldView.columnCount {
-                var nodeLayer: NodeLayer = rowArray.objectAtIndex(columnIndex) as NodeLayer
-                var nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(rowIndex), worldView.gridHeight, worldView.gridHeight)
+                var nodeLayer = rowArray.objectAtIndex(columnIndex) as NodeLayer
+                var nodeRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(rowIndex), worldView.gridHeight, worldView.gridHeight)
                 nodeLayer.frame = CGRectInset(nodeRect, 5.0, 5.0)
                 worldView.layer.addSublayer(nodeLayer)
             }
@@ -67,24 +67,24 @@ class ViewController: UIViewController, ProgressViewDelegate {
     
     /* 把 worldView 中手指按下的位置轉換成 Node Location */
     func nodeLocationInWorldView(position: CGPoint) -> NodeLocation {
-        let row: Int = Int(floor(position.y / worldView.gridHeight) + 1)
-        let column: Int = Int(floor(position.x / worldView.gridHeight) + 1)
+        let row = Int(floor(position.y / worldView.gridHeight) + 1)
+        let column = Int(floor(position.x / worldView.gridHeight) + 1)
         return NodeLocation(row: row, column: column)
     }
 
     /* 讓某個 node 與 touch node 彼此交換位置 */
     func swapNodeWithTouchNode(node: NodeLayer) {
-        let touchNodeLocation: NodeLocation = touchNodeLayer.location
-        let currentNodeLocation: NodeLocation = node.location
-        var touchRowArray: NSMutableArray = nodes.objectAtIndex(touchNodeLocation.row - 1) as NSMutableArray
-        var currentRowArray: NSMutableArray = nodes.objectAtIndex(currentNodeLocation.row - 1) as NSMutableArray
+        let touchNodeLocation = touchNodeLayer.location
+        let currentNodeLocation = node.location
+        var touchRowArray = nodes.objectAtIndex(touchNodeLocation.row - 1) as NSMutableArray
+        var currentRowArray = nodes.objectAtIndex(currentNodeLocation.row - 1) as NSMutableArray
         
         // 更新兩個 node 在 nodes array 中的位置
         if currentNodeLocation.row == touchNodeLocation.row {
             currentRowArray.exchangeObjectAtIndex(touchNodeLocation.column - 1, withObjectAtIndex: currentNodeLocation.column - 1)
         }
         else {
-            let currentNode: NodeLayer = currentRowArray.objectAtIndex(currentNodeLocation.column - 1) as NodeLayer
+            let currentNode = currentRowArray.objectAtIndex(currentNodeLocation.column - 1) as NodeLayer
             touchRowArray.insertObject(currentNode, atIndex: touchNodeLocation.column - 1)
             currentRowArray.insertObject(touchNodeLayer, atIndex: currentNodeLocation.column - 1)
             touchRowArray.removeObjectAtIndex(touchNodeLocation.column)
@@ -112,7 +112,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
     /* 回傳 true 表示有消除 combo nodes，false 則表示畫面上無 combo nodes */
 	func handleComboNodesAnimated(animated: Bool) -> Bool {
 		var	comboNodeLocations: [NodeLocation] = []
-        var running: Bool = true
+        var running = true
 
 		func addLocation(location: NodeLocation) {
 			for comboNodeLocation in comboNodeLocations {
@@ -125,8 +125,8 @@ class ViewController: UIViewController, ProgressViewDelegate {
 
         // 計算某 node 下面有幾個 combo nodes
 		func comboNodeCount(below node: NodeLayer) -> Int {
-			var count: Int = 0
-			let nodeLocation: NodeLocation = node.location
+			var count = 0
+			let nodeLocation = node.location
 			for comboNodeLocation in comboNodeLocations {
 				if (comboNodeLocation as NodeLocation).column == nodeLocation.column &&
 					(comboNodeLocation as NodeLocation).row > nodeLocation.row {
@@ -207,7 +207,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 
 		// 移除畫面上的 Combo Nodes，並把 Combo Nodes 上層的 Nodes 往下掉落
 		for comboNodeLocation in comboNodeLocations {
-            let node: NodeLayer = self.nodeLayer(location: comboNodeLocation)
+            let node = self.nodeLayer(location: comboNodeLocation)
 			if animated {
 				CATransaction.begin()
 				CATransaction.setAnimationDuration(0.3)
@@ -224,7 +224,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
 			var rowArray = nodes.objectAtIndex(rowIndex) as NSMutableArray
 			for columnIndex in 0..<rowArray.count {
 				let node: NodeLayer! = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
-				let comboCount: Int = comboNodeCount(below: node)
+				let comboCount = comboNodeCount(below: node)
 				if comboCount != 0 {
 					if animated {
 						let delay = 0.2 * Float(NSEC_PER_SEC)
@@ -232,14 +232,14 @@ class ViewController: UIViewController, ProgressViewDelegate {
 						dispatch_after(time, dispatch_get_main_queue(), {
 							CATransaction.begin()
 							CATransaction.setAnimationDuration(0.5)
-							var rect: CGRect = node.frame
+							var rect = node.frame
 							rect.origin.y += CGFloat(comboCount) * self.worldView.gridHeight
 							node.frame = rect
 							CATransaction.commit()
 						})
 					}
 					else {
-						var rect: CGRect = node.frame
+						var rect = node.frame
 						rect.origin.y += CGFloat(comboCount) * self.worldView.gridHeight
 						node.frame = rect
 					}
@@ -251,7 +251,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         for columnIndex in 0..<worldView.columnCount {
             // Phase 1 : 計算每一行的 Combo Nodes 數量
             // Phase 2 : 從 nodes array 中移除這些 Combo Nodes
-            var comboCount: Int = 0
+            var comboCount = 0
             for comboNodeLocation in comboNodeLocations {
                 if comboNodeLocation.column == columnIndex + 1 {
                     comboCount++
@@ -267,11 +267,11 @@ class ViewController: UIViewController, ProgressViewDelegate {
                     continue
                 }
                 
-                let node: NodeLayer = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
-                let comboCount: Int = comboNodeCount(below: node)
+                let node = self.nodeLayer(location: NodeLocation(row: rowIndex + 1, column: columnIndex + 1))
+                let comboCount = comboNodeCount(below: node)
                 if comboCount != 0 {
-                    var originRowArray: NSMutableArray = nodes.objectAtIndex(node.location.row - 1) as NSMutableArray
-                    var moveRowArray: NSMutableArray = nodes.objectAtIndex(node.location.row + comboCount - 1) as NSMutableArray
+                    var originRowArray = nodes.objectAtIndex(node.location.row - 1) as NSMutableArray
+                    var moveRowArray = nodes.objectAtIndex(node.location.row + comboCount - 1) as NSMutableArray
                     moveRowArray.insertObject(node, atIndex: columnIndex)
                     originRowArray.removeObjectAtIndex(columnIndex)
                     node.location.row += comboCount
@@ -281,15 +281,15 @@ class ViewController: UIViewController, ProgressViewDelegate {
             // Phase 4 : 建立新落珠，由上往下掉落來填滿畫面
             for addNodeIndex in 0..<comboCount {
 				let nodeTypeArray: [NodeLayerType] = [.RED, .BLUE, .YELLOW, .PURPLE, .GREEN, .PINK]
-                let node: NodeLayer = NodeLayer(nodeType: nodeTypeArray[Int(arc4random() % 6)], nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
-                let nodeRect: CGRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
-                var animationRect: CGRect = nodeRect
+                let node = NodeLayer(nodeType: nodeTypeArray[Int(arc4random() % 6)], nodeLocation: NodeLocation(row: addNodeIndex + 1, column: columnIndex + 1))
+                let nodeRect = CGRectMake(worldView.gridHeight * CGFloat(columnIndex), worldView.gridHeight * CGFloat(addNodeIndex), worldView.gridHeight, worldView.gridHeight)
+                var animationRect = nodeRect
                 animationRect.origin.y -= worldView.gridHeight * CGFloat(comboCount) + 30.0
                 node.frame = CGRectInset(animationRect, 5.0, 5.0)
                 node.hidden = true
                 worldView.layer.addSublayer(node)
                 
-                var rowArray: NSMutableArray = nodes.objectAtIndex(addNodeIndex) as NSMutableArray
+                var rowArray = nodes.objectAtIndex(addNodeIndex) as NSMutableArray
                 rowArray.insertObject(node, atIndex: columnIndex)
 
 				if animated {
@@ -341,14 +341,14 @@ class ViewController: UIViewController, ProgressViewDelegate {
     }
 
     override func touchesBegan(touches: NSSet!, withEvent event: UIEvent!) {
-        let touch: UITouch = touches.anyObject() as UITouch
-        var touchPosition: CGPoint = touch.locationInView(worldView)
+        let touch = touches.anyObject() as UITouch
+        var touchPosition = touch.locationInView(worldView)
         
         if touchPosition.y < 0 {
             return
         }
         
-        let touchLocation: NodeLocation = self.nodeLocationInWorldView(touchPosition)
+        let touchLocation = self.nodeLocationInWorldView(touchPosition)
         touchNodeLayer = self.nodeLayer(location: touchLocation)
         touchNodeRect = touchNodeLayer.frame
         
@@ -368,9 +368,9 @@ class ViewController: UIViewController, ProgressViewDelegate {
             return
         }
         
-        let touch: UITouch = touches.anyObject() as UITouch
-        var touchPosition: CGPoint = touch.locationInView(worldView)
-        var nodeRect: CGRect = touchNodeLayer.frame
+        let touch = touches.anyObject() as UITouch
+        var touchPosition = touch.locationInView(worldView)
+        var nodeRect = touchNodeLayer.frame
         nodeRect.origin.x = touchPosition.x - nodeRect.size.width / 2
         nodeRect.origin.y = touchPosition.y - nodeRect.size.width / 2
         
@@ -384,7 +384,7 @@ class ViewController: UIViewController, ProgressViewDelegate {
         }
         
         // 檢查 touch node 目前的 location 是否有移動到其它地方
-        let currentNodeLocation: NodeLocation = self.nodeLocationInWorldView(touchPosition)
+        let currentNodeLocation = self.nodeLocationInWorldView(touchPosition)
         if currentNodeLocation.row != touchNodeLayer.location.row ||
            currentNodeLocation.column != touchNodeLayer.location.column {
 
